@@ -3,7 +3,8 @@ pub enum FSSpec {
     Label(String),
     UUID(String),
     PartUUID(String),
-    PartLabel(String)
+    PartLabel(String),
+    Custom(String)
 }
 
 #[derive(Clone, Debug)]
@@ -23,6 +24,15 @@ pub enum FSVFSType {
 
 #[derive(Clone, Debug)]
 pub enum FSMntOp {
+    Defaults,
+    RW,
+    RO,
+    Auto,
+    NoAuto,
+    Exec,
+    NoExec,
+    Sync,
+    Async,
     Custom(String)
 }
 
@@ -42,10 +52,10 @@ pub enum FSPassNo {
 
 #[derive(Clone, Debug)]
 pub struct FstabEntry {
-    fs_spec_type: FSSpec,
-    fs_file_type: FSFile,
-    fs_vfs_type: FSVFSType,
-    fs_mntops: Vec<FSMntOp>,
-    fs_freq: FSFreq,
-    fs_passno: FSPassNo
+    pub fs_spec: FSSpec,
+    pub fs_file: FSFile,
+    pub fs_vfs: FSVFSType,
+    pub fs_mntops: Vec<FSMntOp>,
+    pub fs_freq: FSFreq,
+    pub fs_passno: FSPassNo
 }
