@@ -1,4 +1,4 @@
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum FSSpec {
     Label(String),
     UUID(String),
@@ -7,13 +7,13 @@ pub enum FSSpec {
     Custom(String)
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum FSFile {
     Normal(String),
     Swap
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum FSVFSType {
     Ext4,
     Xfs,
@@ -22,7 +22,7 @@ pub enum FSVFSType {
     Custom(String)
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum FSMntOp {
     Defaults,
     RW,
@@ -36,21 +36,21 @@ pub enum FSMntOp {
     Custom(String)
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum FSFreq {
     NoDump,
     Dump,
     DumpWithLowPriority
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum FSPassNo {
     NoCheck,
     CheckRoot,
     CheckOther
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct FstabEntry {
     pub fs_spec: FSSpec,
     pub fs_file: FSFile,

@@ -131,3 +131,38 @@ impl Parser {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_empty_line_parse() -> Result<(), std::io::Error> {
+        let result = Parser::parse_line("")?;
+        assert_eq!(result, FstabLine::EmptyLine);
+        Ok(())
+    }
+
+    #[test]
+    fn it_comment_line_parse() -> Result<(), std::io::Error> {
+        let result = Parser::parse_line("# this is a comment")?;
+        assert_eq!(result, FstabLine::Comment(" this is a comment".to_string()));
+        Ok(())
+    }
+
+    #[test]
+    fn it_normal_line_parse() -> Result<(), std::io::Error> {
+        let result = Parser::parse_line("UUID=4d028ac1-d413-4d3a-94b4-251db287744f / ext4 rw,auto 1 1")?;
+        assert_eq!(result, FstabLine::Entry(
+            FstabEntry {
+                fs_spec: FSSpec::UUID("4d028ac1-d413-4d3a-94b4-251db287744f".to_string()),
+                fs_file: FSFile::Normal("/".to_string()),
+                fs_vfs: FSVFSType::Ext4,
+                fs_mntops: vec![FSMntOp::RW, FSMntOp::Auto],
+                fs_freq: FSFreq::Dump,
+                fs_passno: FSPassNo::CheckRoot
+            }
+        ));
+        Ok(())
+    }
+}

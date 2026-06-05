@@ -1,7 +1,7 @@
 use super::fstab_entry::FstabEntry;
 use super::parser::{Parser, LoadResult};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum FstabLine {
     EmptyLine,
     Entry(FstabEntry),
