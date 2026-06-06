@@ -6,7 +6,7 @@ pub enum ScreenAction {
     NavigateTo(crate::app::Screen),
     ShowPopup(crate::app::Popup),
     HidePopup,
-    Exit
+    ExitApp
 }
 
 pub trait Screen {

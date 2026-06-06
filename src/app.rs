@@ -1,16 +1,17 @@
-use ratatui::widgets::TableState;
-
 use crate::fstab::Fstab;
+use crate::screens::entry_edit_screen::EntryEditScreen;
 use crate::screens::main_screen::MainScreen;
+use crate::popups::comment_edit_popup::CommentEditPopup;
 
 pub enum Screen {
     CorruptedFile,
     MissingFile,
     Main,
-    Edit
+    EntryEdit
 }
 
 pub enum Popup {
+    CommentEdit,
     Save,
     Exit
 }
@@ -20,19 +21,26 @@ pub struct App {
     pub current_screen: Screen,
     pub current_popup: Option<Popup>,
     pub exited: bool,
+
     pub main_screen: MainScreen,
+    pub entry_edit_screen: EntryEditScreen,
+
+    pub comment_edit_popup: CommentEditPopup
 }
 
 impl App {
    pub fn new(fstab_path: &str) -> App {
-       let fstab = Fstab::new(fstab_path);
-       let main_screen = MainScreen::new();
+       let mut fstab = Fstab::new(fstab_path);
+       let main_screen = MainScreen::new(&mut fstab);
+       let entry_edit_screen = EntryEditScreen::new();
        App {
            fstab,
            current_screen: Screen::Main,
            current_popup: None,
            exited: false,
-           main_screen
+           main_screen,
+           entry_edit_screen,
+           comment_edit_popup: CommentEditPopup::new()
        }
    }
 

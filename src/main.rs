@@ -3,6 +3,7 @@ mod fstab;
 mod screens;
 mod ui;
 mod handler;
+mod popups;
 
 use std::io::Stdout;
 use std::{io, env};
