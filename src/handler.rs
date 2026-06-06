@@ -6,7 +6,8 @@ use crate::popups::popup::{Popup, PopupAction};
 pub fn handle_key_event(key_event: KeyEvent, app: &mut App) {
     if let Some(popup) = &app.current_popup {
         let popup_action = match popup {
-            crate::app::Popup::CommentEdit => app.comment_edit_popup.handle_key_event(key_event, &mut app.fstab),
+            crate::app::Popup::CommentEdit(_) => app.comment_edit_popup.handle_key_event(key_event, &mut app.fstab),
+            crate::app::Popup::NewLine(_) => app.new_line_popup.handle_key_event(key_event, &mut app.fstab),
             _ => None
         };
 

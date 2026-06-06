@@ -9,7 +9,7 @@ pub enum PopupAction {
 
 pub trait Popup {
     fn handle_key_event(&mut self, key_event: KeyEvent, fstab: &mut Fstab) -> Option<PopupAction>;
-    fn render(&self, frame: &mut Frame, area: Rect);
+    fn render(&mut self, frame: &mut Frame, area: Rect);
 }
 
 pub fn get_centered_area(width: u16, height: u16, area: Rect) -> Rect {

@@ -11,7 +11,8 @@ pub fn render(app: &mut App, frame: &mut Frame) {
     };
     if let Some(popup) = &app.current_popup {
         match popup {
-            super::app::Popup::CommentEdit => app.comment_edit_popup.render(frame, frame.area()),
+            super::app::Popup::CommentEdit(_) => app.comment_edit_popup.render(frame, frame.area()),
+            super::app::Popup::NewLine(_) => app.new_line_popup.render(frame, frame.area()),
             _ => {}
         }
     }

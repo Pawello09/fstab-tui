@@ -25,7 +25,6 @@ impl fmt::Display for FstabLine {
 pub struct Fstab {
     pub path: String,
     pub lines: Vec<FstabLine>,
-    pub selected_line: Option<usize>,
     pub file_exists: bool,
     pub file_corrupted: bool
 }
@@ -38,21 +37,18 @@ impl Fstab {
             Ok(LoadResult::Loaded(lines)) => Fstab {
                 path: path.to_string(),
                 lines,
-                selected_line: None,
                 file_exists: true,
                 file_corrupted: false
             },
             Ok(LoadResult::MissingFile) => Fstab {
                 path: path.to_string(),
                 lines: vec![],
-                selected_line: None,
                 file_exists: false,
                 file_corrupted: false
             },
             _ => Fstab {
                 path: path.to_string(),
                 lines: vec![],
-                selected_line: None,
                 file_exists: true,
                 file_corrupted: true
             }

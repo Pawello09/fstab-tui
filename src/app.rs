@@ -1,7 +1,8 @@
 use crate::fstab::Fstab;
+use crate::popups::new_line_popup::{NewLinePopup, NewLinePopupData};
 use crate::screens::entry_edit_screen::EntryEditScreen;
 use crate::screens::main_screen::MainScreen;
-use crate::popups::comment_edit_popup::CommentEditPopup;
+use crate::popups::comment_edit_popup::{CommentEditPopup, CommentEditPopupData};
 
 pub enum Screen {
     CorruptedFile,
@@ -11,7 +12,8 @@ pub enum Screen {
 }
 
 pub enum Popup {
-    CommentEdit,
+    CommentEdit(CommentEditPopupData),
+    NewLine(NewLinePopupData),
     Save,
     Exit
 }
@@ -25,7 +27,8 @@ pub struct App {
     pub main_screen: MainScreen,
     pub entry_edit_screen: EntryEditScreen,
 
-    pub comment_edit_popup: CommentEditPopup
+    pub comment_edit_popup: CommentEditPopup,
+    pub new_line_popup: NewLinePopup
 }
 
 impl App {
@@ -40,7 +43,8 @@ impl App {
            exited: false,
            main_screen,
            entry_edit_screen,
-           comment_edit_popup: CommentEditPopup::new()
+           comment_edit_popup: CommentEditPopup::new(),
+           new_line_popup: NewLinePopup::new()
        }
    }
 
@@ -49,6 +53,11 @@ impl App {
    }
 
    pub fn show_popup(&mut self, popup: Popup) {
+       match popup {
+           Popup::CommentEdit(data) => self.comment_edit_popup.init(data.clone(), &self.fstab),
+           Popup::NewLine(data) => self.new_line_popup.init(data.clone()),
+           _ => {}
+       };
        self.current_popup = Some(popup);
    }
 

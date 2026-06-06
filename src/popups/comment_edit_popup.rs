@@ -10,11 +10,17 @@ pub enum Selection {
     CancelButton
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct CommentEditPopupData {
+    pub fstab_line: Option<usize>
+}
+
 pub struct CommentEditPopup {
-    pub comment_input_data: String,
-    pub cursor_position: usize,
-    pub selection: Selection,
-    pub auto_leading_space: bool
+    comment_input_data: String,
+    cursor_position: usize,
+    selection: Selection,
+    auto_leading_space: bool,
+    fstab_line: Option<usize>
 }
 
 impl Popup for CommentEditPopup {
@@ -117,8 +123,8 @@ impl Popup for CommentEditPopup {
         }
     }
 
-    fn render(&self, frame: &mut Frame, area: Rect) {
-        let popup_area = get_centered_area(60, 13, area);
+    fn render(&mut self, frame: &mut Frame, area: Rect) {
+        let popup_area = get_centered_area(80, 13, area);
         frame.render_widget(Clear, popup_area);
         let block = Block::default()
             .borders(Borders::ALL)
@@ -214,8 +220,31 @@ impl CommentEditPopup {
             comment_input_data: String::new(),
             cursor_position: 0,
             selection: Selection::CommentInput,
-            auto_leading_space: true
+            auto_leading_space: true,
+            fstab_line: None
         }
+    }
+
+    pub fn init(&mut self, data: CommentEditPopupData, fstab: &Fstab) {
+        self.selection = Selection::CommentInput;
+        self.fstab_line = data.fstab_line;
+        self.comment_input_data = "".to_string();
+        if let Some(line) = self.fstab_line {
+            match &fstab.lines[line] {
+                FstabLine::Comment(comment) => {
+                    self.comment_input_data = comment.clone();
+                },
+                _ => {}
+            }
+        }
+
+        if self.auto_leading_space {
+            if let Some(comment) = self.comment_input_data.strip_prefix(" ") {
+                self.comment_input_data = comment.to_string();
+            }
+        }
+
+        self.cursor_position = 0;
     }
 
     fn comment_input_backspace(&mut self) {
@@ -249,7 +278,7 @@ impl CommentEditPopup {
     }
 
     fn save_data(&mut self, fstab: &mut Fstab) {
-        if let Some(selected) = fstab.selected_line {
+        if let Some(selected) = self.fstab_line {
             let new_comment = if self.auto_leading_space {
                 FstabLine::Comment(" ".to_owned() + self.comment_input_data.as_str())
             } else {

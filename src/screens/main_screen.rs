@@ -1,4 +1,6 @@
 use crate::fstab::{Fstab, FstabLine};
+use crate::popups::comment_edit_popup::CommentEditPopupData;
+use crate::popups::new_line_popup::{LinePosition, NewLinePopupData};
 use crate::screens::screen::ScreenAction;
 use super::screen::Screen;
 use crossterm::event::{KeyCode, KeyEvent};
@@ -41,7 +43,6 @@ impl Screen for MainScreen {
                 if let Some(selected) = self.fstab_table_state.selected() && selected > 0 {
                     let new_select = Some(selected-1);
                     self.fstab_table_state.select(new_select);
-                    fstab.selected_line = self.fstab_table_state.selected();
                 }
                 None
             },
@@ -53,18 +54,43 @@ impl Screen for MainScreen {
 
                 if new_select < fstab.lines.len() {
                     self.fstab_table_state.select(Some(new_select));
-                    fstab.selected_line = self.fstab_table_state.selected();
                 }
                 None
             },
             KeyCode::Char('e') => {
-                match fstab.selected_line {
-                    None => None,
+                match self.fstab_table_state.selected() {
                     Some(idx) => match fstab.lines[idx] {
                         FstabLine::Entry(_) => Some(ScreenAction::NavigateTo(crate::app::Screen::EntryEdit)),
-                        FstabLine::Comment(_) => Some(ScreenAction::ShowPopup(crate::app::Popup::CommentEdit)),
+                        FstabLine::Comment(_) => Some(ScreenAction::ShowPopup(crate::app::Popup::CommentEdit(
+                            CommentEditPopupData {
+                                fstab_line: Some(idx)
+                            }
+                        ))),
                         _ => None
-                    }
+                    },
+                    _ => None
+                }
+            },
+            KeyCode::Char('o') => {
+                match self.fstab_table_state.selected() {
+                    Some(idx) => Some(ScreenAction::ShowPopup(crate::app::Popup::NewLine(
+                        NewLinePopupData {
+                            fstab_line: Some(idx),
+                            new_line_position: LinePosition::Below
+                        }
+                    ))),
+                    _ => None
+                }
+            },
+            KeyCode::Char('O') => {
+                match self.fstab_table_state.selected() {
+                    Some(idx) => Some(ScreenAction::ShowPopup(crate::app::Popup::NewLine(
+                        NewLinePopupData {
+                            fstab_line: Some(idx),
+                            new_line_position: LinePosition::Above
+                        }
+                    ))),
+                    _ => None
                 }
             },
             _ => None
@@ -79,8 +105,6 @@ impl MainScreen {
             0 => None,
             _ => Some(0)
         });
-
-        fstab.selected_line = fstab_table_state.selected();
 
         Self {
             fstab_table_state
