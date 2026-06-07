@@ -3,6 +3,7 @@ use ratatui::{Frame, layout::Rect};
 use crate::fstab::Fstab;
 
 pub enum PopupAction {
+    ShowPopup(crate::app::Popup),
     Close,
     CloseAndMoveToNextLine,
     ExitApp

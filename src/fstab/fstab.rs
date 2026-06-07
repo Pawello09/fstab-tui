@@ -54,4 +54,13 @@ impl Fstab {
             }
         }
     }
+
+    pub fn write_to_file(&self, path: &str) -> Result<(), std::io::Error> {
+        let content = self.get_content();
+        std::fs::write(path, content)
+    }
+
+    pub fn get_content(&self) -> String {
+        self.lines.iter().map(|line| line.to_string()).collect::<Vec<String>>().join("\n")
+    }
 }

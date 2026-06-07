@@ -15,7 +15,9 @@ pub fn render(app: &mut App, frame: &mut Frame) {
             super::app::Popup::NewLine(_) => app.new_line_popup.render(frame, frame.area()),
             super::app::Popup::DeleteLine(_) => app.delete_line_popup.render(frame, frame.area()),
             super::app::Popup::Exit => app.exit_popup.render(frame, frame.area()),
-            _ => {}
+            super::app::Popup::Write => app.write_popup.render(frame, frame.area()),
+            super::app::Popup::WriteSuccessful => app.write_successful_popup.render(frame, frame.area()),
+            super::app::Popup::WriteError => app.write_error_popup.render(frame, frame.area())
         }
     }
 }

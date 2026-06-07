@@ -10,7 +10,9 @@ pub fn handle_key_event(key_event: KeyEvent, app: &mut App) {
             crate::app::Popup::NewLine(_) => app.new_line_popup.handle_key_event(key_event, &mut app.fstab),
             crate::app::Popup::DeleteLine(_) => app.delete_line_popup.handle_key_event(key_event, &mut app.fstab),
             crate::app::Popup::Exit => app.exit_popup.handle_key_event(key_event, &mut app.fstab),
-            _ => None
+            crate::app::Popup::Write => app.write_popup.handle_key_event(key_event, &mut app.fstab),
+            crate::app::Popup::WriteSuccessful => app.write_successful_popup.handle_key_event(key_event, &mut app.fstab),
+            crate::app::Popup::WriteError => app.write_error_popup.handle_key_event(key_event, &mut app.fstab)
         };
 
         if let Some(popup_action) = popup_action {
@@ -42,6 +44,7 @@ fn handle_screen_action(action: ScreenAction, app: &mut App) {
 
 fn handle_popup_action(action: PopupAction, app: &mut App) {
     match action {
+        PopupAction::ShowPopup(popup) => app.show_popup(popup),
         PopupAction::Close => app.hide_popup(),
         PopupAction::CloseAndMoveToNextLine => {
             app.hide_popup();

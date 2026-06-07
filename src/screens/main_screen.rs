@@ -30,6 +30,8 @@ impl Screen for MainScreen {
             Span::from("<]>").style(Style::new().bold().blue()),
             Span::from(" quit ").into(),
             Span::from("<q> ").style(Style::new().bold().blue()),
+            Span::from(" write ").into(),
+            Span::from("<w> ").style(Style::new().bold().blue()),
             Span::from(" new ").into(),
             Span::from("<o>/<O> ").style(Style::new().bold().blue()),
             Span::from(" edit ").into(),
@@ -118,6 +120,7 @@ impl Screen for MainScreen {
                 }
                 None
             },
+            KeyCode::Char('w') => Some(ScreenAction::ShowPopup(crate::app::Popup::Write)),
             _ => None
         }
     }
