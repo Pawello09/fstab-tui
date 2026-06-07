@@ -21,6 +21,9 @@ use crate::handler::handle_key_event;
 fn main() -> io::Result<()> {
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
+        println!("usage: fstab-tui <file>");
+        println!();
+        println!("Display and manipulate fstab files with TUI.");
         return Ok(());
     }
 
