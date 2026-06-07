@@ -1,4 +1,6 @@
 use crate::fstab::Fstab;
+use crate::popups::delete_line_popup::{DeleteLinePopup, DeleteLinePopupData};
+use crate::popups::exit_popup::ExitPopup;
 use crate::popups::new_line_popup::{NewLinePopup, NewLinePopupData};
 use crate::screens::entry_edit_screen::EntryEditScreen;
 use crate::screens::main_screen::MainScreen;
@@ -14,6 +16,7 @@ pub enum Screen {
 pub enum Popup {
     CommentEdit(CommentEditPopupData),
     NewLine(NewLinePopupData),
+    DeleteLine(DeleteLinePopupData),
     Save,
     Exit
 }
@@ -28,7 +31,9 @@ pub struct App {
     pub entry_edit_screen: EntryEditScreen,
 
     pub comment_edit_popup: CommentEditPopup,
-    pub new_line_popup: NewLinePopup
+    pub new_line_popup: NewLinePopup,
+    pub delete_line_popup: DeleteLinePopup,
+    pub exit_popup: ExitPopup
 }
 
 impl App {
@@ -44,7 +49,9 @@ impl App {
            main_screen,
            entry_edit_screen,
            comment_edit_popup: CommentEditPopup::new(),
-           new_line_popup: NewLinePopup::new()
+           new_line_popup: NewLinePopup::new(),
+           delete_line_popup: DeleteLinePopup::new(),
+           exit_popup: ExitPopup::new()
        }
    }
 
@@ -56,6 +63,8 @@ impl App {
        match popup {
            Popup::CommentEdit(data) => self.comment_edit_popup.init(data.clone(), &self.fstab),
            Popup::NewLine(data) => self.new_line_popup.init(data.clone()),
+           Popup::DeleteLine(data) => self.delete_line_popup.init(data.clone()),
+           Popup::Exit => self.exit_popup.init(),
            _ => {}
        };
        self.current_popup = Some(popup);

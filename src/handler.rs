@@ -8,6 +8,8 @@ pub fn handle_key_event(key_event: KeyEvent, app: &mut App) {
         let popup_action = match popup {
             crate::app::Popup::CommentEdit(_) => app.comment_edit_popup.handle_key_event(key_event, &mut app.fstab),
             crate::app::Popup::NewLine(_) => app.new_line_popup.handle_key_event(key_event, &mut app.fstab),
+            crate::app::Popup::DeleteLine(_) => app.delete_line_popup.handle_key_event(key_event, &mut app.fstab),
+            crate::app::Popup::Exit => app.exit_popup.handle_key_event(key_event, &mut app.fstab),
             _ => None
         };
 

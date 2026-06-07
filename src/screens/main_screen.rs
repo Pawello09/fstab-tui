@@ -1,5 +1,6 @@
 use crate::fstab::{Fstab, FstabLine};
 use crate::popups::comment_edit_popup::CommentEditPopupData;
+use crate::popups::delete_line_popup::DeleteLinePopupData;
 use crate::popups::new_line_popup::{LinePosition, NewLinePopupData};
 use crate::screens::screen::ScreenAction;
 use super::screen::Screen;
@@ -19,12 +20,18 @@ impl Screen for MainScreen {
     fn render(&mut self, frame: &mut Frame, area: ratatui::layout::Rect, fstab: &Fstab) {
         let title = Line::from(" fstab tui ").style(Style::new().bold()).alignment(Alignment::Center);
         let keybinds = Line::from(vec![
-            Span::from(" Up ").into(),
-            Span::from("<Up>/<K>").style(Style::new().bold().blue()),
-            Span::from(" Down ").into(),
-            Span::from("<Down>/<J>").style(Style::new().bold().blue()),
-            Span::from(" Quit ").into(),
-            Span::from("<Q> ").style(Style::new().bold().blue())
+            Span::from(" up ").into(),
+            Span::from("<up>").style(Style::new().bold().blue()),
+            Span::from(" down ").into(),
+            Span::from("<down>").style(Style::new().bold().blue()),
+            Span::from(" quit ").into(),
+            Span::from("<q> ").style(Style::new().bold().blue()),
+            Span::from(" new ").into(),
+            Span::from("<o>/<O> ").style(Style::new().bold().blue()),
+            Span::from(" edit ").into(),
+            Span::from("<e> ").style(Style::new().bold().blue()),
+            Span::from(" delete ").into(),
+            Span::from("<d> ").style(Style::new().bold().blue())
         ]).alignment(Alignment::Center);
         let block = Block::bordered()
             .title(title)
@@ -38,15 +45,15 @@ impl Screen for MainScreen {
 
     fn handle_key_event(&mut self, key_event: KeyEvent, fstab: &mut Fstab) -> Option<ScreenAction> {
         match key_event.code {
-            KeyCode::Esc | KeyCode::Char('q') => Some(ScreenAction::ExitApp),
-            KeyCode::Up | KeyCode::Char('k') => {
+            KeyCode::Esc | KeyCode::Char('q') => Some(ScreenAction::ShowPopup(crate::app::Popup::Exit)),
+            KeyCode::Up => {
                 if let Some(selected) = self.fstab_table_state.selected() && selected > 0 {
                     let new_select = Some(selected-1);
                     self.fstab_table_state.select(new_select);
                 }
                 None
             },
-            KeyCode::Down | KeyCode::Char('j') => {
+            KeyCode::Down => {
                 let new_select = match self.fstab_table_state.selected() {
                     Some(selected) => selected + 1,
                     None => 0
@@ -88,6 +95,16 @@ impl Screen for MainScreen {
                         NewLinePopupData {
                             fstab_line: Some(idx),
                             new_line_position: LinePosition::Above
+                        }
+                    ))),
+                    _ => None
+                }
+            },
+            KeyCode::Char('d') => {
+                match self.fstab_table_state.selected() {
+                    Some(idx) => Some(ScreenAction::ShowPopup(crate::app::Popup::DeleteLine(
+                        DeleteLinePopupData {
+                            fstab_line: Some(idx),
                         }
                     ))),
                     _ => None
