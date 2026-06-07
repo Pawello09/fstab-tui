@@ -4,6 +4,7 @@ use crate::fstab::Fstab;
 
 pub enum PopupAction {
     Close,
+    CloseAndMoveToNextLine,
     ExitApp
 }
 

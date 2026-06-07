@@ -37,14 +37,16 @@ fn handle_screen_action(action: ScreenAction, app: &mut App) {
         ScreenAction::ShowPopup(popup) => app.show_popup(popup),
         ScreenAction::HidePopup => app.hide_popup(),
         ScreenAction::ExitApp => app.exit(),
-        _ => {}
     }
 }
 
 fn handle_popup_action(action: PopupAction, app: &mut App) {
     match action {
         PopupAction::Close => app.hide_popup(),
+        PopupAction::CloseAndMoveToNextLine => {
+            app.hide_popup();
+            app.main_screen.fstab_table_state.select_next();
+        }
         PopupAction::ExitApp => app.exit(),
-        _ => {}
     }
 }

@@ -24,6 +24,10 @@ impl Screen for MainScreen {
             Span::from("<up>").style(Style::new().bold().blue()),
             Span::from(" down ").into(),
             Span::from("<down>").style(Style::new().bold().blue()),
+            Span::from(" move up ").into(),
+            Span::from("<[>").style(Style::new().bold().blue()),
+            Span::from(" move down ").into(),
+            Span::from("<]>").style(Style::new().bold().blue()),
             Span::from(" quit ").into(),
             Span::from("<q> ").style(Style::new().bold().blue()),
             Span::from(" new ").into(),
@@ -47,21 +51,11 @@ impl Screen for MainScreen {
         match key_event.code {
             KeyCode::Esc | KeyCode::Char('q') => Some(ScreenAction::ShowPopup(crate::app::Popup::Exit)),
             KeyCode::Up => {
-                if let Some(selected) = self.fstab_table_state.selected() && selected > 0 {
-                    let new_select = Some(selected-1);
-                    self.fstab_table_state.select(new_select);
-                }
+                self.fstab_table_state.select_previous();
                 None
             },
             KeyCode::Down => {
-                let new_select = match self.fstab_table_state.selected() {
-                    Some(selected) => selected + 1,
-                    None => 0
-                };
-
-                if new_select < fstab.lines.len() {
-                    self.fstab_table_state.select(Some(new_select));
-                }
+                self.fstab_table_state.select_next();
                 None
             },
             KeyCode::Char('e') => {
@@ -78,28 +72,18 @@ impl Screen for MainScreen {
                     _ => None
                 }
             },
-            KeyCode::Char('o') => {
-                match self.fstab_table_state.selected() {
-                    Some(idx) => Some(ScreenAction::ShowPopup(crate::app::Popup::NewLine(
-                        NewLinePopupData {
-                            fstab_line: Some(idx),
-                            new_line_position: LinePosition::Below
-                        }
-                    ))),
-                    _ => None
+            KeyCode::Char('o') => Some(ScreenAction::ShowPopup(crate::app::Popup::NewLine(
+                NewLinePopupData {
+                    fstab_line: self.fstab_table_state.selected(),
+                    new_line_position: LinePosition::Below
                 }
-            },
-            KeyCode::Char('O') => {
-                match self.fstab_table_state.selected() {
-                    Some(idx) => Some(ScreenAction::ShowPopup(crate::app::Popup::NewLine(
-                        NewLinePopupData {
-                            fstab_line: Some(idx),
-                            new_line_position: LinePosition::Above
-                        }
-                    ))),
-                    _ => None
+            ))),
+            KeyCode::Char('O') => Some(ScreenAction::ShowPopup(crate::app::Popup::NewLine(
+                NewLinePopupData {
+                    fstab_line: self.fstab_table_state.selected(),
+                    new_line_position: LinePosition::Above
                 }
-            },
+            ))),
             KeyCode::Char('d') => {
                 match self.fstab_table_state.selected() {
                     Some(idx) => Some(ScreenAction::ShowPopup(crate::app::Popup::DeleteLine(
@@ -109,6 +93,30 @@ impl Screen for MainScreen {
                     ))),
                     _ => None
                 }
+            },
+            KeyCode::Char('[') => {
+                match self.fstab_table_state.selected() {
+                    Some(idx) => {
+                        if idx > 0 {
+                            fstab.lines.swap(idx, idx-1);
+                            self.fstab_table_state.select_previous();
+                        }
+                    },
+                    _ => {}
+                }
+                None
+            },
+            KeyCode::Char(']') => {
+                match self.fstab_table_state.selected() {
+                    Some(idx) => {
+                        if idx + 1 < fstab.lines.len() {
+                            fstab.lines.swap(idx, idx+1);
+                            self.fstab_table_state.select_next();
+                        }
+                    },
+                    _ => {}
+                }
+                None
             },
             _ => None
         }
@@ -157,4 +165,5 @@ impl MainScreen {
 
         frame.render_stateful_widget(table, area, &mut self.fstab_table_state);
     }
+
 }

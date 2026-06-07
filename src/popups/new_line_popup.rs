@@ -25,8 +25,7 @@ impl Popup for NewLinePopup {
         match key_event.code {
             KeyCode::Esc | KeyCode::Char('q') => Some(PopupAction::Close),
             KeyCode::Enter => {
-                self.list_submit_action(fstab);
-                Some(PopupAction::Close)
+                self.list_submit_action(fstab)
             },
             KeyCode::Up => {
                 self.list_prev_line();
@@ -92,7 +91,7 @@ impl NewLinePopup {
         self.line_type_list_state.select_next();
     }
 
-    fn list_submit_action(&mut self, fstab: &mut Fstab) {
+    fn list_submit_action(&mut self, fstab: &mut Fstab) -> Option<PopupAction> {
         if let Some(selected) = self.line_type_list_state.selected() {
             match selected {
                 0 => self.add_line(FstabLine::EmptyLine, fstab),
@@ -105,12 +104,14 @@ impl NewLinePopup {
                     fs_freq: FSFreq::NoDump,
                     fs_passno: FSPassNo::CheckOther
                 }), fstab),
-                _ => {}
+                _ => None
             }
+        } else {
+            None
         }
     }
 
-    fn add_line(&mut self, fstab_line: FstabLine, fstab: &mut Fstab) {
+    fn add_line(&mut self, fstab_line: FstabLine, fstab: &mut Fstab) -> Option<PopupAction> {
         let new_line_idx = match self.new_line_position {
             LinePosition::Below => match self.fstab_line {
                 Some(line) => line + 1,
@@ -123,5 +124,10 @@ impl NewLinePopup {
         };
 
         fstab.lines.insert(new_line_idx, fstab_line);
+
+        match self.new_line_position {
+            LinePosition::Below => Some(PopupAction::CloseAndMoveToNextLine),
+            LinePosition::Above => Some(PopupAction::Close)
+        }
     }
 }
