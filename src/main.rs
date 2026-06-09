@@ -4,6 +4,7 @@ mod screens;
 mod ui;
 mod handler;
 mod popups;
+mod components;
 
 use std::io::Stdout;
 use std::{io, env};

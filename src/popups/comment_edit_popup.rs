@@ -1,6 +1,6 @@
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::{Frame, layout::{Constraint, Direction, Layout, Rect, Alignment}, style::{Color, Style}, text::Text, widgets::{Block, Borders, Clear, Padding, Paragraph}};
-use crate::{fstab::{Fstab, FstabLine}, popups::popup::{Popup, PopupAction, get_centered_area}};
+use crate::{components::TextInput, fstab::{Fstab, FstabLine}, popups::popup::{Popup, PopupAction, get_centered_area}};
 
 #[derive(PartialEq)]
 pub enum Selection {
@@ -16,8 +16,7 @@ pub struct CommentEditPopupData {
 }
 
 pub struct CommentEditPopup {
-    comment_input_data: String,
-    cursor_position: usize,
+    comment_input: TextInput,
     selection: Selection,
     auto_leading_space: bool,
     fstab_line: Option<usize>
@@ -47,7 +46,7 @@ impl Popup for CommentEditPopup {
                         self.selection = Selection::CancelButton;
                     },
                     Selection::CommentInput => {
-                        self.comment_input_left();
+                        self.comment_input.left();
                     },
                     _ => {}
                 };
@@ -59,7 +58,7 @@ impl Popup for CommentEditPopup {
                         self.selection = Selection::ConfirmButton;
                     },
                     Selection::CommentInput => {
-                        self.comment_input_right();
+                        self.comment_input.right();
                     },
                     _ => {}
                 };
@@ -68,7 +67,7 @@ impl Popup for CommentEditPopup {
             KeyCode::Backspace => {
                 match self.selection {
                     Selection::CommentInput => {
-                        self.comment_input_backspace();
+                        self.comment_input.backspace();
                     },
                     _ => {}
                 };
@@ -77,7 +76,7 @@ impl Popup for CommentEditPopup {
             KeyCode::Delete => {
                 match self.selection {
                     Selection::CommentInput => {
-                        self.comment_input_delete();
+                        self.comment_input.delete();
                     },
                     _ => {}
                 };
@@ -107,10 +106,28 @@ impl Popup for CommentEditPopup {
                 };
                 None
             },
+            KeyCode::Home => {
+                match self.selection {
+                    Selection::CommentInput => {
+                        self.comment_input.home();
+                    },
+                    _ => {}
+                }
+                None
+            },
+            KeyCode::End => {
+                match self.selection {
+                    Selection::CommentInput => {
+                        self.comment_input.end();
+                    },
+                    _ => {}
+                }
+                None
+            },
             KeyCode::Char(c) => {
                 match self.selection {
                     Selection::CommentInput => {
-                        self.comment_input_write(c);
+                        self.comment_input.write(&c);
                         None
                     },
                     _ => match c {
@@ -141,10 +158,10 @@ impl Popup for CommentEditPopup {
 
         frame.render_widget(block, popup_area);
 
-        let text = if self.comment_input_data.is_empty() {
+        let text = if self.comment_input.value.is_empty() {
             Text::from("enter your comment...").style(Style::new().fg(Color::DarkGray))
         } else {
-            Text::from(self.comment_input_data.clone())
+            Text::from(self.comment_input.value.clone())
         };
 
         let comment_input_style = if self.selection == Selection::CommentInput {
@@ -157,6 +174,14 @@ impl Popup for CommentEditPopup {
             .borders(Borders::ALL)
             .title(" comment: ")
             .style(comment_input_style);
+
+        if self.selection == Selection::CommentInput {
+            let comment_input_block_inner = comment_input_block.inner(chunks[0]);
+            let cursor_x = comment_input_block_inner.x + self.comment_input.cursor_position;
+            let cursor_y = comment_input_block_inner.y;
+
+            frame.set_cursor_position((cursor_x, cursor_y));
+        }
 
         let comment_input = Paragraph::new(text)
             .block(comment_input_block);
@@ -217,8 +242,7 @@ impl Popup for CommentEditPopup {
 impl CommentEditPopup {
     pub fn new() -> Self {
         Self {
-            comment_input_data: String::new(),
-            cursor_position: 0,
+            comment_input: TextInput::default(),
             selection: Selection::CommentInput,
             auto_leading_space: true,
             fstab_line: None
@@ -228,61 +252,28 @@ impl CommentEditPopup {
     pub fn init(&mut self, data: CommentEditPopupData, fstab: &Fstab) {
         self.selection = Selection::CommentInput;
         self.fstab_line = data.fstab_line;
-        self.comment_input_data = "".to_string();
         if let Some(line) = self.fstab_line {
             match &fstab.lines[line] {
                 FstabLine::Comment(comment) => {
-                    self.comment_input_data = comment.clone();
+                    self.comment_input.set_value(comment);
                 },
                 _ => {}
             }
         }
 
         if self.auto_leading_space {
-            if let Some(comment) = self.comment_input_data.strip_prefix(" ") {
-                self.comment_input_data = comment.to_string();
+            if let Some(comment) = self.comment_input.value.strip_prefix(" ") {
+                self.comment_input.set_value(&comment.to_string());
             }
-        }
-
-        self.cursor_position = 0;
-    }
-
-    fn comment_input_backspace(&mut self) {
-        if self.cursor_position > 0 {
-            self.cursor_position -= 1;
-            self.comment_input_data.remove(self.cursor_position);
-        }
-    }
-
-    fn comment_input_delete(&mut self) {
-        if self.cursor_position < self.comment_input_data.len() {
-            self.comment_input_data.remove(self.cursor_position);
-        }
-    }
-
-    fn comment_input_write(&mut self, c: char) {
-        self.comment_input_data.insert(self.cursor_position, c);
-        self.cursor_position += 1;
-    }
-
-    fn comment_input_left(&mut self) {
-        if self.cursor_position > 0 {
-            self.cursor_position = self.cursor_position - 1;
-        }
-    }
-
-    fn comment_input_right(&mut self) {
-        if self.cursor_position < self.comment_input_data.len() {
-            self.cursor_position = self.cursor_position + 1;
         }
     }
 
     fn save_data(&mut self, fstab: &mut Fstab) {
         if let Some(selected) = self.fstab_line {
             let new_comment = if self.auto_leading_space {
-                FstabLine::Comment(" ".to_owned() + self.comment_input_data.as_str())
+                FstabLine::Comment(" ".to_owned() + self.comment_input.value.as_str())
             } else {
-                FstabLine::Comment(self.comment_input_data.clone())
+                FstabLine::Comment(self.comment_input.value.clone())
             };
 
             fstab.lines[selected] = new_comment;

@@ -4,7 +4,7 @@ use crate::popups::exit_popup::ExitPopup;
 use crate::popups::new_line_popup::{NewLinePopup, NewLinePopupData};
 use crate::popups::write_error_popup::WriteErrorPopup;
 use crate::popups::write_successful_popup::WriteSuccessfulPopup;
-use crate::screens::entry_edit_screen::EntryEditScreen;
+use crate::screens::entry_edit_screen::{EntryEditScreen, EntryEditScreenData};
 use crate::screens::main_screen::MainScreen;
 use crate::popups::comment_edit_popup::{CommentEditPopup, CommentEditPopupData};
 use crate::popups::write_popup::WritePopup;
@@ -13,7 +13,7 @@ pub enum Screen {
     CorruptedFile,
     MissingFile,
     Main,
-    EntryEdit
+    EntryEdit(EntryEditScreenData)
 }
 
 pub enum Popup {
@@ -67,6 +67,10 @@ impl App {
    }
 
    pub fn navigate_to(&mut self, screen: Screen) {
+       match screen {
+           Screen::EntryEdit(ref data) => self.entry_edit_screen.init(data.clone()),
+           _ => {}
+       }
        self.current_screen = screen;
    }
 

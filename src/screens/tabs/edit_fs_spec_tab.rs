@@ -1,0 +1,116 @@
+use crossterm::event::KeyCode;
+use ratatui::{Frame, layout::{Constraint, Direction, Layout}, style::Modifier, widgets::{Block, Borders, List, ListState, Paragraph}};
+use crate::{components::TextInput, fstab::fstab_entry::FSSpec, screens::tabs::ScreenTab};
+
+pub struct EditFSSpecTab {
+    category_list_state: ListState,
+    text_input: TextInput,
+}
+
+impl EditFSSpecTab {
+    pub fn new() -> Self {
+        let mut category_list_state = ListState::default();
+        category_list_state.select_first();
+
+        Self {
+            category_list_state,
+            text_input: TextInput::default(),
+        }
+    }
+
+    pub fn init(&mut self, fs_spec: FSSpec) {
+        self.text_input.set_value(&match fs_spec {
+            FSSpec::Label(ref label) => label.to_string(),
+            FSSpec::UUID(ref uuid) => uuid.to_string(),
+            FSSpec::PartLabel(ref partlabel) => partlabel.to_string(),
+            FSSpec::PartUUID(ref partuuid) => partuuid.to_string(),
+            FSSpec::Custom(ref custom) => custom.to_string()
+        });
+        self.category_list_state.select(Some(match fs_spec {
+            FSSpec::Label(_) => 0,
+            FSSpec::UUID(_) => 1,
+            FSSpec::PartLabel(_) => 2,
+            FSSpec::PartUUID(_) => 3,
+            FSSpec::Custom(_) => 4
+        }));
+    }
+
+    const CATEGORY_LABELS: [&'static str; 5] = [
+        "LABEL", "UUID", "PARTLABEL", "PARTUUID", "custom"
+    ];
+}
+
+impl ScreenTab for EditFSSpecTab {
+    fn render(&mut self, frame: &mut Frame, area: ratatui::layout::Rect) {
+        let chunks = Layout::default()
+            .spacing(1)
+            .direction(Direction::Horizontal)
+            .constraints([
+                Constraint::Percentage(50),
+                Constraint::Percentage(50)
+            ]).split(area);
+
+        let text_input_chunks = Layout::default()
+            .spacing(1)
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Length(3)
+            ]).split(chunks[1]);
+
+        let category_list = List::new(Self::CATEGORY_LABELS).highlight_style(Modifier::REVERSED);
+
+        let text_input_title_text = match self.category_list_state.selected() {
+            Some(idx) => match idx {
+                0 => "label:",
+                1 => "uuid:",
+                2 => "partlabel:",
+                3 => "partuuid:",
+                4 => "custom value:",
+                _ => "value:"
+            }
+            None => "value:"
+        };
+
+        let text_input_block = Block::new()
+            .borders(Borders::ALL)
+            .title(text_input_title_text);
+
+        let text_input_block_inner = text_input_block.inner(text_input_chunks[0]);
+        let text_input_cursor_x = text_input_block_inner.x + self.text_input.cursor_position;
+        let text_input_cursor_y = text_input_block_inner.y;
+
+        frame.set_cursor_position((text_input_cursor_x, text_input_cursor_y));
+
+        let text_input = Paragraph::new(self.text_input.value.clone())
+            .block(text_input_block);
+
+        frame.render_stateful_widget(category_list, chunks[0], &mut self.category_list_state);
+        frame.render_widget(text_input, text_input_chunks[0]);
+    }
+
+    fn handle_key_event(&mut self, key_event: crossterm::event::KeyEvent, fstab: &mut crate::fstab::Fstab) -> Option<crate::screens::screen::ScreenAction> {
+        match key_event.code {
+            KeyCode::Up => {
+                self.category_list_state.select_previous();
+                None
+            },
+            KeyCode::Down => {
+                self.category_list_state.select_next();
+                None
+            },
+            KeyCode::PageUp => {
+                self.category_list_state.select_first();
+                None
+            },
+            KeyCode::PageDown => {
+                self.category_list_state.select_last();
+                None
+            },
+            KeyCode::Left | KeyCode::Right | KeyCode::Home | KeyCode::End | KeyCode::Backspace | KeyCode::Delete | KeyCode::Char(_) => {
+                self.text_input.handle_key_event(key_event);
+                None
+            },
+            _ => None
+        }
+    }
+}

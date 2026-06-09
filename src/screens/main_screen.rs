@@ -2,6 +2,7 @@ use crate::fstab::{Fstab, FstabLine};
 use crate::popups::comment_edit_popup::CommentEditPopupData;
 use crate::popups::delete_line_popup::DeleteLinePopupData;
 use crate::popups::new_line_popup::{LinePosition, NewLinePopupData};
+use crate::screens::entry_edit_screen::EntryEditScreenData;
 use crate::screens::screen::ScreenAction;
 use super::screen::Screen;
 use crossterm::event::{KeyCode, KeyEvent};
@@ -60,10 +61,23 @@ impl Screen for MainScreen {
                 self.fstab_table_state.select_next();
                 None
             },
+            KeyCode::PageUp => {
+                self.fstab_table_state.select_first();
+                None
+            },
+            KeyCode::PageDown => {
+                self.fstab_table_state.select_last();
+                None
+            },
             KeyCode::Char('e') => {
                 match self.fstab_table_state.selected() {
-                    Some(idx) => match fstab.lines[idx] {
-                        FstabLine::Entry(_) => Some(ScreenAction::NavigateTo(crate::app::Screen::EntryEdit)),
+                    Some(idx) => match &fstab.lines[idx] {
+                        FstabLine::Entry(entry) => Some(ScreenAction::NavigateTo(crate::app::Screen::EntryEdit(
+                            EntryEditScreenData {
+                                entry: entry.clone(),
+                                fstab_line: self.fstab_table_state.selected()
+                            }
+                        ))),
                         FstabLine::Comment(_) => Some(ScreenAction::ShowPopup(crate::app::Popup::CommentEdit(
                             CommentEditPopupData {
                                 fstab_line: Some(idx)

@@ -24,7 +24,7 @@ pub fn handle_key_event(key_event: KeyEvent, app: &mut App) {
 
     let screen_action = match app.current_screen {
         crate::app::Screen::Main => app.main_screen.handle_key_event(key_event, &mut app.fstab),
-        crate::app::Screen::EntryEdit => app.entry_edit_screen.handle_key_event(key_event, &mut app.fstab),
+        crate::app::Screen::EntryEdit(_) => app.entry_edit_screen.handle_key_event(key_event, &mut app.fstab),
         _ => None
     };
 
