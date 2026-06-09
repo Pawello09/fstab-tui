@@ -81,8 +81,12 @@ impl Parser {
     }
 
     fn parse_fs_file(s: &str) -> FSFile {
-        if s == "swap" {
+        if s.to_lowercase() == "swap" {
             return FSFile::Swap;
+        }
+
+        if s.to_lowercase() == "none" {
+            return FSFile::None;
         }
 
         FSFile::Normal(s.to_string())

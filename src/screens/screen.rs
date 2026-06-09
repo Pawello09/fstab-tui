@@ -4,9 +4,7 @@ use crate::fstab::Fstab;
 
 pub enum ScreenAction {
     NavigateTo(crate::app::Screen),
-    ShowPopup(crate::app::Popup),
-    HidePopup,
-    ExitApp
+    ShowPopup(crate::app::Popup)
 }
 
 pub trait Screen {

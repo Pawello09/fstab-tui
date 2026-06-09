@@ -37,8 +37,6 @@ fn handle_screen_action(action: ScreenAction, app: &mut App) {
     match action {
         ScreenAction::NavigateTo(screen) => app.navigate_to(screen),
         ScreenAction::ShowPopup(popup) => app.show_popup(popup),
-        ScreenAction::HidePopup => app.hide_popup(),
-        ScreenAction::ExitApp => app.exit(),
     }
 }
 

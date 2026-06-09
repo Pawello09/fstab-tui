@@ -158,26 +158,15 @@ impl Popup for CommentEditPopup {
 
         frame.render_widget(block, popup_area);
 
-        let text = if self.comment_input.value.is_empty() {
-            Text::from("enter your comment...").style(Style::new().fg(Color::DarkGray))
-        } else {
-            Text::from(self.comment_input.value.clone())
-        };
-
-        let comment_input_style = if self.selection == Selection::CommentInput {
-            Style::default().fg(Color::White)
-        } else {
-            Style::default().fg(Color::DarkGray)
-        };
+        let text = Text::from(self.comment_input.get_input_text());
 
         let comment_input_block = Block::new()
             .borders(Borders::ALL)
-            .title(" comment: ")
-            .style(comment_input_style);
+            .title(" comment: ");
 
         if self.selection == Selection::CommentInput {
             let comment_input_block_inner = comment_input_block.inner(chunks[0]);
-            let cursor_x = comment_input_block_inner.x + self.comment_input.cursor_position;
+            let cursor_x = comment_input_block_inner.x + self.comment_input.get_cursor_offset();
             let cursor_y = comment_input_block_inner.y;
 
             frame.set_cursor_position((cursor_x, cursor_y));
@@ -241,8 +230,10 @@ impl Popup for CommentEditPopup {
 
 impl CommentEditPopup {
     pub fn new() -> Self {
+        let mut comment_input = TextInput::default();
+        comment_input.set_prefix(&"# ".to_string());
         Self {
-            comment_input: TextInput::default(),
+            comment_input,
             selection: Selection::CommentInput,
             auto_leading_space: true,
             fstab_line: None
@@ -262,9 +253,12 @@ impl CommentEditPopup {
         }
 
         if self.auto_leading_space {
+            self.comment_input.set_prefix(&"# ".to_string());
             if let Some(comment) = self.comment_input.value.strip_prefix(" ") {
                 self.comment_input.set_value(&comment.to_string());
             }
+        } else {
+            self.comment_input.set_prefix(&"#".to_string());
         }
     }
 
@@ -282,5 +276,9 @@ impl CommentEditPopup {
 
     fn toggle_auto_leading_space(&mut self) {
         self.auto_leading_space = !self.auto_leading_space;
+        self.comment_input.set_prefix(&match self.auto_leading_space {
+            true => "# ",
+            false => "#"
+        }.to_string());
     }
 }

@@ -4,17 +4,19 @@ use crate::{components::TextInput, fstab::fstab_entry::FSSpec, screens::tabs::Sc
 
 pub struct EditFSSpecTab {
     category_list_state: ListState,
-    text_input: TextInput,
+    text_input: TextInput
 }
 
 impl EditFSSpecTab {
     pub fn new() -> Self {
         let mut category_list_state = ListState::default();
         category_list_state.select_first();
+        let mut text_input = TextInput::default();
+        text_input.set_prefix(&"LABEL=".to_string());
 
         Self {
             category_list_state,
-            text_input: TextInput::default(),
+            text_input
         }
     }
 
@@ -33,6 +35,13 @@ impl EditFSSpecTab {
             FSSpec::PartUUID(_) => 3,
             FSSpec::Custom(_) => 4
         }));
+        self.text_input.set_prefix(&match fs_spec {
+            FSSpec::Label(_) => "LABEL=".to_string(),
+            FSSpec::UUID(_) => "UUID=".to_string(),
+            FSSpec::PartLabel(_) => "PARTLABEL=".to_string(),
+            FSSpec::PartUUID(_) => "PARTUUID=".to_string(),
+            _ => "".to_string()
+        });
     }
 
     const CATEGORY_LABELS: [&'static str; 5] = [
@@ -76,20 +85,20 @@ impl ScreenTab for EditFSSpecTab {
             .title(text_input_title_text);
 
         let text_input_block_inner = text_input_block.inner(text_input_chunks[0]);
-        let text_input_cursor_x = text_input_block_inner.x + self.text_input.cursor_position;
+        let text_input_cursor_x = text_input_block_inner.x + self.text_input.get_cursor_offset();
         let text_input_cursor_y = text_input_block_inner.y;
 
         frame.set_cursor_position((text_input_cursor_x, text_input_cursor_y));
 
-        let text_input = Paragraph::new(self.text_input.value.clone())
+        let text_input = Paragraph::new(self.text_input.get_input_text())
             .block(text_input_block);
 
         frame.render_stateful_widget(category_list, chunks[0], &mut self.category_list_state);
         frame.render_widget(text_input, text_input_chunks[0]);
     }
 
-    fn handle_key_event(&mut self, key_event: crossterm::event::KeyEvent, fstab: &mut crate::fstab::Fstab) -> Option<crate::screens::screen::ScreenAction> {
-        match key_event.code {
+    fn handle_key_event(&mut self, key_event: crossterm::event::KeyEvent) -> Option<crate::screens::screen::ScreenAction> {
+        let screen_action = match key_event.code {
             KeyCode::Up => {
                 self.category_list_state.select_previous();
                 None
@@ -111,6 +120,16 @@ impl ScreenTab for EditFSSpecTab {
                 None
             },
             _ => None
-        }
+        };
+
+        self.text_input.set_prefix(&match self.category_list_state.selected() {
+            Some(0) => "LABEL=".to_string(),
+            Some(1) => "UUID=".to_string(),
+            Some(2) => "PARTLABEL=".to_string(),
+            Some(3) => "PARTUUID=".to_string(),
+            _ => "".to_string()
+        });
+
+        screen_action
     }
 }

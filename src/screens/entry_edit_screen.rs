@@ -1,6 +1,7 @@
-use crate::fstab::fstab_entry::{FSFile, FSVFSType, FstabEntry};
+use crate::fstab::fstab_entry::{FstabEntry};
 use crate::fstab::{Fstab};
 use crate::screens::screen::ScreenAction;
+use crate::screens::tabs::EditFSFileTab;
 use super::screen::Screen;
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::Frame;
@@ -28,11 +29,12 @@ pub struct EntryEditScreenData {
 
 pub struct EntryEditScreen {
     active_tab: Tab,
-    fs_spec_tab: EditFSSpecTab
+    fs_spec_tab: EditFSSpecTab,
+    fs_file_tab: EditFSFileTab
 }
 
 impl Screen for EntryEditScreen {
-    fn render(&mut self, frame: &mut Frame, area: ratatui::layout::Rect, fstab: &Fstab) {
+    fn render(&mut self, frame: &mut Frame, area: ratatui::layout::Rect, _fstab: &Fstab) {
         let title = Line::from(" fstab tui - edit ").style(Style::new().bold()).alignment(Alignment::Center);
         let keybinds = Line::from(vec![]).alignment(Alignment::Center);
         let block = Block::bordered()
@@ -43,6 +45,7 @@ impl Screen for EntryEditScreen {
 
         match self.active_tab {
             Tab::FSSpec => self.fs_spec_tab.render(frame, block.inner(area)),
+            Tab::FSFile => self.fs_file_tab.render(frame, block.inner(area)),
             _ => {}
         }
 
@@ -61,7 +64,8 @@ impl Screen for EntryEditScreen {
                 None
             },
             _ => match self.active_tab {
-                Tab::FSSpec => self.fs_spec_tab.handle_key_event(key_event, fstab),
+                Tab::FSSpec => self.fs_spec_tab.handle_key_event(key_event),
+                Tab::FSFile => self.fs_file_tab.handle_key_event(key_event),
                 _ => None
             }
         }
@@ -72,7 +76,8 @@ impl EntryEditScreen {
     pub fn new() -> Self {
         Self {
             active_tab: Tab::FSSpec,
-            fs_spec_tab: EditFSSpecTab::new()
+            fs_spec_tab: EditFSSpecTab::new(),
+            fs_file_tab: EditFSFileTab::new()
         }
     }
 
@@ -80,6 +85,7 @@ impl EntryEditScreen {
         self.active_tab = Tab::FSSpec;
 
         self.fs_spec_tab.init(data.entry.fs_spec);
+        self.fs_file_tab.init(data.entry.fs_file);
     }
 
     fn next_tab(&mut self) {

@@ -7,7 +7,7 @@ pub struct WriteErrorPopup {
 }
 
 impl Popup for WriteErrorPopup {
-    fn handle_key_event(&mut self, key_event: KeyEvent, fstab: &mut Fstab) -> Option<PopupAction> {
+    fn handle_key_event(&mut self, key_event: KeyEvent, _fstab: &mut Fstab) -> Option<PopupAction> {
         match key_event.code {
             KeyCode::Esc | KeyCode::Char('q') | KeyCode::Enter => Some(PopupAction::Close),
             _ => None

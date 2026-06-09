@@ -1,6 +1,6 @@
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::{Frame, layout::{Constraint, Direction, Layout, Rect, Alignment}, style::{Color, Style}, widgets::{Block, Borders, Clear, Padding, Paragraph}};
-use crate::{fstab::Fstab, popups::popup::{Popup, PopupAction, get_centered_area}, screens::screen::ScreenAction};
+use crate::{fstab::Fstab, popups::popup::{Popup, PopupAction, get_centered_area}};
 
 #[derive(PartialEq)]
 pub enum Selection {

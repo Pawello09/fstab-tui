@@ -24,6 +24,7 @@ impl fmt::Display for FSSpec {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum FSFile {
     Normal(String),
+    None,
     Swap
 }
 
@@ -31,6 +32,7 @@ impl fmt::Display for FSFile {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             FSFile::Swap => write!(f, "swap"),
+            FSFile::None => write!(f, "none"),
             FSFile::Normal(path) => write!(f, "{}", path)
         }
     }

@@ -8,17 +8,12 @@ pub enum Selection {
     CancelButton
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct ExitPopupData {
-    pub fstab_line: Option<usize>
-}
-
 pub struct ExitPopup {
     selection: Selection,
 }
 
 impl Popup for ExitPopup {
-    fn handle_key_event(&mut self, key_event: KeyEvent, fstab: &mut Fstab) -> Option<PopupAction> {
+    fn handle_key_event(&mut self, key_event: KeyEvent, _fstab: &mut Fstab) -> Option<PopupAction> {
         match key_event.code {
             KeyCode::Esc | KeyCode::Char('q') => Some(PopupAction::Close),
             KeyCode::Enter => {
@@ -26,8 +21,7 @@ impl Popup for ExitPopup {
                     Selection::CancelButton => Some(PopupAction::Close),
                     Selection::ExitButton => {
                         Some(PopupAction::ExitApp)
-                    },
-                    _ => None
+                    }
                 }
             },
             KeyCode::Left => {

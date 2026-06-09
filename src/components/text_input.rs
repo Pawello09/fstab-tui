@@ -1,6 +1,7 @@
 use crossterm::event::{KeyCode, KeyEvent};
 
 pub struct TextInput {
+    pub prefix: String,
     pub cursor_position: u16,
     pub value: String
 }
@@ -9,14 +10,16 @@ impl TextInput {
     pub fn new(value: &String, cursor_position: u16) -> Self {
         Self {
             value: value.clone(),
-            cursor_position: std::cmp::min(cursor_position, value.len() as u16)
+            cursor_position: std::cmp::min(cursor_position, value.len() as u16),
+            prefix: "".to_string()
         }
     }
 
     pub fn default() -> Self {
         Self {
             value: "".to_string(),
-            cursor_position: 0
+            cursor_position: 0,
+            prefix: "".to_string()
         }
     }
 
@@ -63,6 +66,10 @@ impl TextInput {
         self.cursor_position = self.value.len() as u16;
     }
 
+    pub fn set_prefix(&mut self, prefix: &String) {
+        self.prefix = prefix.clone();
+    }
+
     pub fn handle_key_event(&mut self, key_event: KeyEvent) {
         match key_event.code {
             KeyCode::Left => {
@@ -88,5 +95,13 @@ impl TextInput {
             }
             _ => {}
         }
+    }
+
+    pub fn get_input_text(&self) -> String {
+        self.prefix.clone() + &self.value
+    }
+
+    pub fn get_cursor_offset(&self) -> u16 {
+        self.cursor_position + self.prefix.len() as u16
     }
 }
