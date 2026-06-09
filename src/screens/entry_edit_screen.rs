@@ -1,17 +1,19 @@
-use crate::fstab::fstab_entry::{FSSpec, FstabEntry};
+use crate::fstab::fstab_entry::{FstabEntry};
 use crate::fstab::{Fstab, FstabLine};
 use crate::screens::screen::ScreenAction;
 use crate::screens::tabs::EditFSFileTab;
 use super::screen::Screen;
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::Frame;
-use ratatui::layout::Alignment;
-use ratatui::style::Style;
+use ratatui::layout::{Alignment, Constraint, Direction, Layout, Spacing};
+use ratatui::style::{Color, Style};
 use ratatui::symbols::border;
+use ratatui::symbols::merge::MergeStrategy;
 use ratatui::text::Line;
-use ratatui::widgets::{Block, Padding};
+use ratatui::widgets::{Block, BorderType, Borders, Padding, Paragraph};
 use super::tabs::{ScreenTab, EditFSSpecTab};
 
+#[derive(PartialEq, Eq, Clone)]
 pub enum Tab {
    FSSpec,
    FSFile,
@@ -44,9 +46,57 @@ impl Screen for EntryEditScreen {
             .border_set(border::THICK)
             .padding(Padding::new(2, 2, 1, 1));
 
+        let chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .spacing(1)
+            .constraints([
+                Constraint::Length(3),
+                Constraint::Fill(1)
+            ]).split(block.inner(area));
+
+        let navbar_chunks = Layout::default()
+            .direction(Direction::Horizontal)
+            .spacing(Spacing::Overlap(1))
+            .constraints(Self::NAVBAR_LABELS.iter().map(|_| Constraint::Fill(1)))
+            .split(chunks[0]);
+
+        for (idx, navbar_label_text) in Self::NAVBAR_LABELS.iter().enumerate() {
+            let navbar_label_block = Block::new()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Thick)
+                .merge_borders(MergeStrategy::Exact)
+                .border_style(Style::default().fg(Color::White));
+
+            let navbar_label_selected = Some(self.active_tab.clone()) == match idx {
+                0 => Some(Tab::FSSpec),
+                1 => Some(Tab::FSFile),
+                2 => Some(Tab::FSVFSType),
+                3 => Some(Tab::FSMntOps),
+                4 => Some(Tab::FSFreq),
+                5 => Some(Tab::FSPassNo),
+                _ => None
+            };
+
+            let navbar_label_style = if navbar_label_selected {
+                Style::new()
+                    .fg(Color::LightBlue)
+                    .bold()
+            } else {
+                Style::new()
+                    .fg(Color::White)
+            };
+
+            let navbar_label = Paragraph::new(*navbar_label_text)
+                .block(navbar_label_block)
+                .style(navbar_label_style)
+                .centered();
+
+            frame.render_widget(navbar_label, navbar_chunks[idx]);
+        }
+
         match self.active_tab {
-            Tab::FSSpec => self.fs_spec_tab.render(frame, block.inner(area)),
-            Tab::FSFile => self.fs_file_tab.render(frame, block.inner(area)),
+            Tab::FSSpec => self.fs_spec_tab.render(frame, chunks[1]),
+            Tab::FSFile => self.fs_file_tab.render(frame, chunks[1]),
             _ => {}
         }
 
@@ -75,6 +125,15 @@ impl Screen for EntryEditScreen {
 }
 
 impl EntryEditScreen {
+    const NAVBAR_LABELS: [&'static str; 6] = [
+        "fs_spec",
+        "fs_file",
+        "fs_vfs_type",
+        "fs_mntops",
+        "fs_freq",
+        "fs_passno"
+    ];
+
     pub fn new() -> Self {
         Self {
             active_tab: Tab::FSSpec,
