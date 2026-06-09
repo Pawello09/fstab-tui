@@ -9,6 +9,12 @@ pub struct EditFSFileTab {
 }
 
 impl EditFSFileTab {
+    const CATEGORY_LABELS: [&'static str; 3] = [
+        "file",
+        "none",
+        "swap"
+    ];
+
     pub fn new() -> Self {
         let mut category_list_state = ListState::default();
         category_list_state.select_first();
@@ -44,11 +50,13 @@ impl EditFSFileTab {
         }));
     }
 
-    const CATEGORY_LABELS: [&'static str; 3] = [
-        "file",
-        "none",
-        "swap"
-    ];
+    pub fn get_fs_file(&self) -> FSFile {
+        match self.category_list_state.selected() {
+            Some(0) => FSFile::Normal(self.text_input.get_input_text()),
+            Some(2) => FSFile::Swap,
+            _ => FSFile::None
+        }
+    }
 }
 
 impl ScreenTab for EditFSFileTab {

@@ -8,6 +8,10 @@ pub struct EditFSSpecTab {
 }
 
 impl EditFSSpecTab {
+    const CATEGORY_LABELS: [&'static str; 5] = [
+        "LABEL", "UUID", "PARTLABEL", "PARTUUID", "custom"
+    ];
+
     pub fn new() -> Self {
         let mut category_list_state = ListState::default();
         category_list_state.select_first();
@@ -44,9 +48,16 @@ impl EditFSSpecTab {
         });
     }
 
-    const CATEGORY_LABELS: [&'static str; 5] = [
-        "LABEL", "UUID", "PARTLABEL", "PARTUUID", "custom"
-    ];
+    pub fn get_fs_spec(&self) -> FSSpec {
+        let value = self.text_input.value.clone();
+        match self.category_list_state.selected() {
+            Some(0) => FSSpec::Label(value),
+            Some(1) => FSSpec::UUID(value),
+            Some(2) => FSSpec::PartLabel(value),
+            Some(3) => FSSpec::PartUUID(value),
+            _ => FSSpec::Custom(value)
+        }
+    }
 }
 
 impl ScreenTab for EditFSSpecTab {

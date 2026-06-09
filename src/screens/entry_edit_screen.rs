@@ -1,5 +1,5 @@
-use crate::fstab::fstab_entry::{FstabEntry};
-use crate::fstab::{Fstab};
+use crate::fstab::fstab_entry::{FSSpec, FstabEntry};
+use crate::fstab::{Fstab, FstabLine};
 use crate::screens::screen::ScreenAction;
 use crate::screens::tabs::EditFSFileTab;
 use super::screen::Screen;
@@ -30,7 +30,8 @@ pub struct EntryEditScreenData {
 pub struct EntryEditScreen {
     active_tab: Tab,
     fs_spec_tab: EditFSSpecTab,
-    fs_file_tab: EditFSFileTab
+    fs_file_tab: EditFSFileTab,
+    fstab_line: Option<usize>
 }
 
 impl Screen for EntryEditScreen {
@@ -55,6 +56,7 @@ impl Screen for EntryEditScreen {
     fn handle_key_event(&mut self, key_event: KeyEvent, fstab: &mut Fstab) -> Option<ScreenAction> {
         match key_event.code {
             KeyCode::Esc => Some(ScreenAction::NavigateTo(crate::app::Screen::Main)),
+            KeyCode::Enter => self.save(fstab),
             KeyCode::Char('[') => {
                 self.prev_tab();
                 None
@@ -77,12 +79,14 @@ impl EntryEditScreen {
         Self {
             active_tab: Tab::FSSpec,
             fs_spec_tab: EditFSSpecTab::new(),
-            fs_file_tab: EditFSFileTab::new()
+            fs_file_tab: EditFSFileTab::new(),
+            fstab_line: None
         }
     }
 
     pub fn init(&mut self, data: EntryEditScreenData) {
         self.active_tab = Tab::FSSpec;
+        self.fstab_line = data.fstab_line;
 
         self.fs_spec_tab.init(data.entry.fs_spec);
         self.fs_file_tab.init(data.entry.fs_file);
@@ -115,6 +119,22 @@ impl EntryEditScreen {
 
         if let Some(new_tab) = new_tab {
             self.active_tab = new_tab;
+        }
+    }
+
+    fn save(&self, fstab: &mut Fstab) -> Option<ScreenAction> {
+        if let Some(line) = self.fstab_line {
+            fstab.lines[line] = FstabLine::Entry(FstabEntry {
+                fs_spec: self.fs_spec_tab.get_fs_spec(),
+                fs_file: self.fs_file_tab.get_fs_file(),
+                fs_vfs: crate::fstab::fstab_entry::FSVFSType::Ext4,
+                fs_mntops: vec![],
+                fs_freq: crate::fstab::fstab_entry::FSFreq::NoDump,
+                fs_passno: crate::fstab::fstab_entry::FSPassNo::NoCheck
+            });
+            Some(ScreenAction::NavigateTo(crate::app::Screen::Main))
+        } else {
+            None
         }
     }
 }
