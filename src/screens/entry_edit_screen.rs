@@ -1,7 +1,7 @@
 use crate::fstab::fstab_entry::{FstabEntry};
 use crate::fstab::{Fstab, FstabLine};
 use crate::screens::screen::ScreenAction;
-use crate::screens::tabs::{EditFSFileTab, EditFSFreqTab, EditFSVFSTypeTab};
+use crate::screens::tabs::{EditFSFileTab, EditFSFreqTab, EditFSPassNoTab, EditFSVFSTypeTab};
 use super::screen::Screen;
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::Frame;
@@ -35,7 +35,8 @@ pub struct EntryEditScreen {
     fs_spec_tab: EditFSSpecTab,
     fs_file_tab: EditFSFileTab,
     fs_vfs_type_tab: EditFSVFSTypeTab,
-    fs_freq_tab: EditFSFreqTab
+    fs_freq_tab: EditFSFreqTab,
+    fs_passno_tab: EditFSPassNoTab
 }
 
 impl Screen for EntryEditScreen {
@@ -101,6 +102,7 @@ impl Screen for EntryEditScreen {
             Tab::FSFile => self.fs_file_tab.render(frame, chunks[1]),
             Tab::FSVFSType => self.fs_vfs_type_tab.render(frame, chunks[1]),
             Tab::FSFreq => self.fs_freq_tab.render(frame, chunks[1]),
+            Tab::FSPassNo => self.fs_passno_tab.render(frame, chunks[1]),
             _ => {}
         }
 
@@ -124,6 +126,7 @@ impl Screen for EntryEditScreen {
                 Tab::FSFile => self.fs_file_tab.handle_key_event(key_event),
                 Tab::FSVFSType => self.fs_vfs_type_tab.handle_key_event(key_event),
                 Tab::FSFreq => self.fs_freq_tab.handle_key_event(key_event),
+                Tab::FSPassNo => self.fs_passno_tab.handle_key_event(key_event),
                 _ => None
             }
         }
@@ -147,6 +150,7 @@ impl EntryEditScreen {
             fs_file_tab: EditFSFileTab::new(),
             fs_vfs_type_tab: EditFSVFSTypeTab::new(),
             fs_freq_tab: EditFSFreqTab::new(),
+            fs_passno_tab: EditFSPassNoTab::new(),
             fstab_line: None
         }
     }
@@ -159,6 +163,7 @@ impl EntryEditScreen {
         self.fs_file_tab.init(data.entry.fs_file);
         self.fs_vfs_type_tab.init(data.entry.fs_vfs);
         self.fs_freq_tab.init(data.entry.fs_freq);
+        self.fs_passno_tab.init(data.entry.fs_passno);
     }
 
     fn next_tab(&mut self) {
@@ -199,7 +204,7 @@ impl EntryEditScreen {
                 fs_vfs: self.fs_vfs_type_tab.get_fs_vfs_type(),
                 fs_mntops: vec![],
                 fs_freq: self.fs_freq_tab.get_fs_freq(),
-                fs_passno: crate::fstab::fstab_entry::FSPassNo::NoCheck
+                fs_passno: self.fs_passno_tab.get_fs_passno()
             });
             Some(ScreenAction::NavigateTo(crate::app::Screen::Main))
         } else {
