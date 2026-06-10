@@ -104,7 +104,7 @@ impl NewLinePopup {
                     fs_freq: FSFreq::NoDump,
                     fs_passno: FSPassNo::CheckOther
                 }), fstab),
-                _ => None
+                _ => Some(PopupAction::Close)
             }
         } else {
             None
