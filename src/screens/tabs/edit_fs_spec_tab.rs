@@ -3,23 +3,23 @@ use ratatui::{Frame, layout::{Constraint, Direction, Layout}, style::Modifier, w
 use crate::{components::TextInput, fstab::fstab_entry::FSSpec, screens::tabs::ScreenTab};
 
 pub struct EditFSSpecTab {
-    category_list_state: ListState,
+    type_list_state: ListState,
     text_input: TextInput
 }
 
 impl EditFSSpecTab {
-    const CATEGORY_LABELS: [&'static str; 5] = [
+    const TYPE_LABELS: [&'static str; 5] = [
         "LABEL", "UUID", "PARTLABEL", "PARTUUID", "custom"
     ];
 
     pub fn new() -> Self {
-        let mut category_list_state = ListState::default();
-        category_list_state.select_first();
+        let mut type_list_state = ListState::default();
+        type_list_state.select_first();
         let mut text_input = TextInput::default();
         text_input.set_prefix(&"LABEL=".to_string());
 
         Self {
-            category_list_state,
+            type_list_state,
             text_input
         }
     }
@@ -32,7 +32,7 @@ impl EditFSSpecTab {
             FSSpec::PartUUID(ref partuuid) => partuuid.to_string(),
             FSSpec::Custom(ref custom) => custom.to_string()
         });
-        self.category_list_state.select(Some(match fs_spec {
+        self.type_list_state.select(Some(match fs_spec {
             FSSpec::Label(_) => 0,
             FSSpec::UUID(_) => 1,
             FSSpec::PartLabel(_) => 2,
@@ -50,7 +50,7 @@ impl EditFSSpecTab {
 
     pub fn get_fs_spec(&self) -> FSSpec {
         let value = self.text_input.value.clone();
-        match self.category_list_state.selected() {
+        match self.type_list_state.selected() {
             Some(0) => FSSpec::Label(value),
             Some(1) => FSSpec::UUID(value),
             Some(2) => FSSpec::PartLabel(value),
@@ -77,9 +77,9 @@ impl ScreenTab for EditFSSpecTab {
                 Constraint::Length(3)
             ]).split(chunks[1]);
 
-        let category_list = List::new(Self::CATEGORY_LABELS).highlight_style(Modifier::REVERSED);
+        let type_list = List::new(Self::TYPE_LABELS).highlight_style(Modifier::REVERSED);
 
-        let text_input_title_text = match self.category_list_state.selected() {
+        let text_input_title_text = match self.type_list_state.selected() {
             Some(idx) => match idx {
                 0 => "label:",
                 1 => "uuid:",
@@ -104,26 +104,26 @@ impl ScreenTab for EditFSSpecTab {
         let text_input = Paragraph::new(self.text_input.get_input_text())
             .block(text_input_block);
 
-        frame.render_stateful_widget(category_list, chunks[0], &mut self.category_list_state);
+        frame.render_stateful_widget(type_list, chunks[0], &mut self.type_list_state);
         frame.render_widget(text_input, text_input_chunks[0]);
     }
 
     fn handle_key_event(&mut self, key_event: crossterm::event::KeyEvent) -> Option<crate::screens::screen::ScreenAction> {
         let screen_action = match key_event.code {
             KeyCode::Up => {
-                self.category_list_state.select_previous();
+                self.type_list_state.select_previous();
                 None
             },
             KeyCode::Down => {
-                self.category_list_state.select_next();
+                self.type_list_state.select_next();
                 None
             },
             KeyCode::PageUp => {
-                self.category_list_state.select_first();
+                self.type_list_state.select_first();
                 None
             },
             KeyCode::PageDown => {
-                self.category_list_state.select_last();
+                self.type_list_state.select_last();
                 None
             },
             KeyCode::Left | KeyCode::Right | KeyCode::Home | KeyCode::End | KeyCode::Backspace | KeyCode::Delete | KeyCode::Char(_) => {
@@ -133,7 +133,7 @@ impl ScreenTab for EditFSSpecTab {
             _ => None
         };
 
-        self.text_input.set_prefix(&match self.category_list_state.selected() {
+        self.text_input.set_prefix(&match self.type_list_state.selected() {
             Some(0) => "LABEL=".to_string(),
             Some(1) => "UUID=".to_string(),
             Some(2) => "PARTLABEL=".to_string(),

@@ -1,65 +1,64 @@
 use crossterm::event::KeyCode;
 use ratatui::{Frame, layout::{Constraint, Direction, Layout}, style::Modifier, widgets::{Block, Borders, List, ListState, Paragraph}};
-use crate::{components::TextInput, fstab::fstab_entry::FSFile, screens::{screen::ScreenAction, tabs::ScreenTab}};
+use crate::{components::TextInput, fstab::fstab_entry::FSVFSType, screens::{screen::ScreenAction, tabs::ScreenTab}};
 
-pub struct EditFSFileTab {
+pub struct EditFSVFSTypeTab {
     type_list_state: ListState,
     text_input: TextInput,
     text_input_visible: bool
 }
 
-impl EditFSFileTab {
-    const TYPE_LABELS: [&'static str; 3] = [
-        "file",
-        "none",
-        "swap"
+impl EditFSVFSTypeTab {
+    const TYPE_LABELS: [&'static str; 5] = [
+        "ext4",
+        "xfs",
+        "btrfs",
+        "f2fs",
+        "custom"
     ];
 
     pub fn new() -> Self {
         let mut type_list_state = ListState::default();
         type_list_state.select_first();
-        let mut text_input = TextInput::new(&"".to_string(), 0);
-        text_input.set_prefix(&"/".to_string());
+        let text_input = TextInput::new(&"".to_string(), 0);
 
         Self {
             type_list_state,
             text_input,
-            text_input_visible: true
+            text_input_visible: false
         }
     }
 
-    pub fn init(&mut self, fs_file: FSFile) {
-        self.text_input.set_value(&match fs_file {
-            FSFile::Normal(ref value) => {
-                if let Some(rest) = value.strip_prefix("/") {
-                    rest.to_string()
-                } else {
-                    value.clone()
-                }
-            },
+    pub fn init(&mut self, fs_vfs_type: FSVFSType) {
+        self.text_input.set_value(&match fs_vfs_type {
+            FSVFSType::Custom(ref value) => value.clone(),
             _ => "".to_string()
         });
-        self.text_input_visible = match fs_file {
-            FSFile::Normal(_) => true,
+        self.text_input_visible = match fs_vfs_type {
+            FSVFSType::Custom(_) => true,
             _ => false
         };
-        self.type_list_state.select(Some(match fs_file {
-            FSFile::Normal(_) => 0,
-            FSFile::None => 1,
-            FSFile::Swap => 2
+        self.type_list_state.select(Some(match fs_vfs_type {
+            FSVFSType::Ext4 => 0,
+            FSVFSType::Xfs => 1,
+            FSVFSType::Btrfs => 2,
+            FSVFSType::F2fs => 3,
+            FSVFSType::Custom(_) => 4
         }));
     }
 
-    pub fn get_fs_file(&self) -> FSFile {
+    pub fn get_fs_vfs_type(&self) -> FSVFSType {
         match self.type_list_state.selected() {
-            Some(0) => FSFile::Normal(self.text_input.get_input_text()),
-            Some(2) => FSFile::Swap,
-            _ => FSFile::None
+            Some(0) => FSVFSType::Ext4,
+            Some(1) => FSVFSType::Xfs,
+            Some(2) => FSVFSType::Btrfs,
+            Some(3) => FSVFSType::F2fs,
+            _ => FSVFSType::Custom(self.text_input.value.clone())
         }
     }
 }
 
-impl ScreenTab for EditFSFileTab {
+impl ScreenTab for EditFSVFSTypeTab {
     fn render(&mut self, frame: &mut Frame, area: ratatui::layout::Rect) {
         let chunks = Layout::default()
             .spacing(1)
@@ -84,12 +83,12 @@ impl ScreenTab for EditFSFileTab {
                 .title("path:");
 
             let text_input_block_inner = text_input_block.inner(text_input_chunks[0]);
-            let text_input_cursor_x = text_input_block_inner.x + self.text_input.get_cursor_offset();
+            let text_input_cursor_x = text_input_block_inner.x + self.text_input.cursor_position;
             let text_input_cursor_y = text_input_block_inner.y;
 
             frame.set_cursor_position((text_input_cursor_x, text_input_cursor_y));
 
-            let text_input = Paragraph::new(self.text_input.get_input_text())
+            let text_input = Paragraph::new(self.text_input.value.clone())
                 .block(text_input_block);
 
             frame.render_widget(text_input, text_input_chunks[0]);
@@ -131,7 +130,7 @@ impl ScreenTab for EditFSFileTab {
         };
 
         self.text_input_visible = match self.type_list_state.selected() {
-            Some(0) => true,
+            Some(4) => true,
             _ => false
         };
 

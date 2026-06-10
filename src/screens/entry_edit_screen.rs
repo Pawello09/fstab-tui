@@ -1,7 +1,7 @@
 use crate::fstab::fstab_entry::{FstabEntry};
 use crate::fstab::{Fstab, FstabLine};
 use crate::screens::screen::ScreenAction;
-use crate::screens::tabs::EditFSFileTab;
+use crate::screens::tabs::{EditFSFileTab, EditFSVFSTypeTab};
 use super::screen::Screen;
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::Frame;
@@ -31,9 +31,10 @@ pub struct EntryEditScreenData {
 
 pub struct EntryEditScreen {
     active_tab: Tab,
+    fstab_line: Option<usize>,
     fs_spec_tab: EditFSSpecTab,
     fs_file_tab: EditFSFileTab,
-    fstab_line: Option<usize>
+    fs_vfs_type_tab: EditFSVFSTypeTab
 }
 
 impl Screen for EntryEditScreen {
@@ -97,6 +98,7 @@ impl Screen for EntryEditScreen {
         match self.active_tab {
             Tab::FSSpec => self.fs_spec_tab.render(frame, chunks[1]),
             Tab::FSFile => self.fs_file_tab.render(frame, chunks[1]),
+            Tab::FSVFSType => self.fs_vfs_type_tab.render(frame, chunks[1]),
             _ => {}
         }
 
@@ -118,6 +120,7 @@ impl Screen for EntryEditScreen {
             _ => match self.active_tab {
                 Tab::FSSpec => self.fs_spec_tab.handle_key_event(key_event),
                 Tab::FSFile => self.fs_file_tab.handle_key_event(key_event),
+                Tab::FSVFSType => self.fs_vfs_type_tab.handle_key_event(key_event),
                 _ => None
             }
         }
@@ -139,6 +142,7 @@ impl EntryEditScreen {
             active_tab: Tab::FSSpec,
             fs_spec_tab: EditFSSpecTab::new(),
             fs_file_tab: EditFSFileTab::new(),
+            fs_vfs_type_tab: EditFSVFSTypeTab::new(),
             fstab_line: None
         }
     }
@@ -149,6 +153,7 @@ impl EntryEditScreen {
 
         self.fs_spec_tab.init(data.entry.fs_spec);
         self.fs_file_tab.init(data.entry.fs_file);
+        self.fs_vfs_type_tab.init(data.entry.fs_vfs);
     }
 
     fn next_tab(&mut self) {
@@ -186,7 +191,7 @@ impl EntryEditScreen {
             fstab.lines[line] = FstabLine::Entry(FstabEntry {
                 fs_spec: self.fs_spec_tab.get_fs_spec(),
                 fs_file: self.fs_file_tab.get_fs_file(),
-                fs_vfs: crate::fstab::fstab_entry::FSVFSType::Ext4,
+                fs_vfs: self.fs_vfs_type_tab.get_fs_vfs_type(),
                 fs_mntops: vec![],
                 fs_freq: crate::fstab::fstab_entry::FSFreq::NoDump,
                 fs_passno: crate::fstab::fstab_entry::FSPassNo::NoCheck
