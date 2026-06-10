@@ -80,7 +80,7 @@ impl ScreenTab for EditFSVFSTypeTab {
         if self.text_input_visible {
             let text_input_block = Block::new()
                 .borders(Borders::ALL)
-                .title("path:");
+                .title("custom vfs type:");
 
             let text_input_block_inner = text_input_block.inner(text_input_chunks[0]);
             let text_input_cursor_x = text_input_block_inner.x + self.text_input.cursor_position;

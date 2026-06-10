@@ -1,7 +1,7 @@
 use crate::fstab::fstab_entry::{FstabEntry};
 use crate::fstab::{Fstab, FstabLine};
 use crate::screens::screen::ScreenAction;
-use crate::screens::tabs::{EditFSFileTab, EditFSVFSTypeTab};
+use crate::screens::tabs::{EditFSFileTab, EditFSFreqTab, EditFSVFSTypeTab};
 use super::screen::Screen;
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::Frame;
@@ -34,7 +34,8 @@ pub struct EntryEditScreen {
     fstab_line: Option<usize>,
     fs_spec_tab: EditFSSpecTab,
     fs_file_tab: EditFSFileTab,
-    fs_vfs_type_tab: EditFSVFSTypeTab
+    fs_vfs_type_tab: EditFSVFSTypeTab,
+    fs_freq_tab: EditFSFreqTab
 }
 
 impl Screen for EntryEditScreen {
@@ -99,6 +100,7 @@ impl Screen for EntryEditScreen {
             Tab::FSSpec => self.fs_spec_tab.render(frame, chunks[1]),
             Tab::FSFile => self.fs_file_tab.render(frame, chunks[1]),
             Tab::FSVFSType => self.fs_vfs_type_tab.render(frame, chunks[1]),
+            Tab::FSFreq => self.fs_freq_tab.render(frame, chunks[1]),
             _ => {}
         }
 
@@ -121,6 +123,7 @@ impl Screen for EntryEditScreen {
                 Tab::FSSpec => self.fs_spec_tab.handle_key_event(key_event),
                 Tab::FSFile => self.fs_file_tab.handle_key_event(key_event),
                 Tab::FSVFSType => self.fs_vfs_type_tab.handle_key_event(key_event),
+                Tab::FSFreq => self.fs_freq_tab.handle_key_event(key_event),
                 _ => None
             }
         }
@@ -143,6 +146,7 @@ impl EntryEditScreen {
             fs_spec_tab: EditFSSpecTab::new(),
             fs_file_tab: EditFSFileTab::new(),
             fs_vfs_type_tab: EditFSVFSTypeTab::new(),
+            fs_freq_tab: EditFSFreqTab::new(),
             fstab_line: None
         }
     }
@@ -154,6 +158,7 @@ impl EntryEditScreen {
         self.fs_spec_tab.init(data.entry.fs_spec);
         self.fs_file_tab.init(data.entry.fs_file);
         self.fs_vfs_type_tab.init(data.entry.fs_vfs);
+        self.fs_freq_tab.init(data.entry.fs_freq);
     }
 
     fn next_tab(&mut self) {
@@ -193,7 +198,7 @@ impl EntryEditScreen {
                 fs_file: self.fs_file_tab.get_fs_file(),
                 fs_vfs: self.fs_vfs_type_tab.get_fs_vfs_type(),
                 fs_mntops: vec![],
-                fs_freq: crate::fstab::fstab_entry::FSFreq::NoDump,
+                fs_freq: self.fs_freq_tab.get_fs_freq(),
                 fs_passno: crate::fstab::fstab_entry::FSPassNo::NoCheck
             });
             Some(ScreenAction::NavigateTo(crate::app::Screen::Main))
