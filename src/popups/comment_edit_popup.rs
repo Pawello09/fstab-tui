@@ -28,14 +28,19 @@ impl Popup for CommentEditPopup {
             KeyCode::Esc => Some(PopupAction::Close),
             KeyCode::Enter => {
                 match self.selection {
-                    Selection::AutoLeadingSpaceCheckbox => {
-                        self.toggle_auto_leading_space();
-                        None
-                    }
                     Selection::CancelButton => Some(PopupAction::Close),
                     Selection::ConfirmButton => {
                         self.save_data(fstab);
                         Some(PopupAction::Close)
+                    },
+                    _ => None
+                }
+            },
+            KeyCode::Char(' ') => {
+                match self.selection {
+                    Selection::AutoLeadingSpaceCheckbox => {
+                        self.toggle_auto_leading_space();
+                        None
                     },
                     _ => None
                 }

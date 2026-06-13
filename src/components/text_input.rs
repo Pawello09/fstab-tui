@@ -3,15 +3,17 @@ use crossterm::event::{KeyCode, KeyEvent};
 pub struct TextInput {
     pub prefix: String,
     pub cursor_position: u16,
-    pub value: String
+    pub value: String,
+    pub whitespace_escaping: bool
 }
 
 impl TextInput {
-    pub fn new(value: &String, cursor_position: u16) -> Self {
+    pub fn new(value: &String, cursor_position: u16, whitespace_escaping: bool) -> Self {
         Self {
             value: value.clone(),
             cursor_position: std::cmp::min(cursor_position, value.len() as u16),
-            prefix: "".to_string()
+            prefix: "".to_string(),
+            whitespace_escaping
         }
     }
 
@@ -19,8 +21,13 @@ impl TextInput {
         Self {
             value: "".to_string(),
             cursor_position: 0,
-            prefix: "".to_string()
+            prefix: "".to_string(),
+            whitespace_escaping: false
         }
+    }
+
+    pub fn set_whitespace_escaping(&mut self, enabled: bool) {
+        self.whitespace_escaping = enabled;
     }
 
     pub fn backspace(&mut self) {
@@ -62,8 +69,22 @@ impl TextInput {
     }
 
     pub fn set_value(&mut self, value: &String) {
+        let mut value = value.clone();
+        if self.whitespace_escaping {
+            value = value.replace("\\040", " ");
+            value = value.replace("\\011", "\t");
+        }
         self.value = value.clone();
         self.cursor_position = self.value.len() as u16;
+    }
+
+    pub fn get_value(&self) -> String {
+        let mut value = self.value.clone();
+        if self.whitespace_escaping {
+            value = value.replace(" ", "\\040");
+            value = value.replace("\t", "\\011");
+        }
+        value
     }
 
     pub fn set_prefix(&mut self, prefix: &String) {

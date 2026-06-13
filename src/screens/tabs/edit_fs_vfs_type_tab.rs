@@ -20,7 +20,7 @@ impl EditFSVFSTypeTab {
     pub fn new() -> Self {
         let mut type_list_state = ListState::default();
         type_list_state.select_first();
-        let text_input = TextInput::new(&"".to_string(), 0);
+        let text_input = TextInput::new(&"".to_string(), 0, true);
 
         Self {
             type_list_state,
@@ -53,7 +53,7 @@ impl EditFSVFSTypeTab {
             Some(1) => FSVFSType::Xfs,
             Some(2) => FSVFSType::Btrfs,
             Some(3) => FSVFSType::F2fs,
-            _ => FSVFSType::Custom(self.text_input.value.clone())
+            _ => FSVFSType::Custom(self.text_input.get_value())
         }
     }
 }
@@ -88,7 +88,7 @@ impl ScreenTab for EditFSVFSTypeTab {
 
             frame.set_cursor_position((text_input_cursor_x, text_input_cursor_y));
 
-            let text_input = Paragraph::new(self.text_input.value.clone())
+            let text_input = Paragraph::new(self.text_input.get_input_text())
                 .block(text_input_block);
 
             frame.render_widget(text_input, text_input_chunks[0]);

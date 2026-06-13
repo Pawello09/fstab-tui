@@ -1,6 +1,6 @@
 use crossterm::event::KeyCode;
 use ratatui::{Frame, layout::{Constraint, Direction, Layout}, style::Modifier, widgets::{List, ListState}};
-use crate::{fstab::fstab_entry::{FSFreq, FSPassNo}, screens::{screen::ScreenAction, tabs::ScreenTab}};
+use crate::{fstab::fstab_entry::FSPassNo, screens::{screen::ScreenAction, tabs::ScreenTab}};
 
 pub struct EditFSPassNoTab {
     type_list_state: ListState

@@ -25,20 +25,25 @@ impl Screen for MainScreen {
             Span::from("<up>").style(Style::new().bold().blue()),
             Span::from(" down ").into(),
             Span::from("<down>").style(Style::new().bold().blue()),
+            Span::from(" first line ").into(),
+            Span::from("<page up>").style(Style::new().bold().blue()),
+            Span::from(" last line ").into(),
+            Span::from("<page down>").style(Style::new().bold().blue()),
             Span::from(" move up ").into(),
             Span::from("<[>").style(Style::new().bold().blue()),
             Span::from(" move down ").into(),
             Span::from("<]>").style(Style::new().bold().blue()),
             Span::from(" quit ").into(),
-            Span::from("<q> ").style(Style::new().bold().blue()),
+            Span::from("<q>/<esc>").style(Style::new().bold().blue()),
             Span::from(" write ").into(),
-            Span::from("<w> ").style(Style::new().bold().blue()),
+            Span::from("<w>").style(Style::new().bold().blue()),
             Span::from(" new ").into(),
-            Span::from("<o>/<O> ").style(Style::new().bold().blue()),
+            Span::from("<o>/<O>").style(Style::new().bold().blue()),
             Span::from(" edit ").into(),
-            Span::from("<e> ").style(Style::new().bold().blue()),
+            Span::from("<e>").style(Style::new().bold().blue()),
             Span::from(" delete ").into(),
-            Span::from("<d> ").style(Style::new().bold().blue())
+            Span::from("<d>").style(Style::new().bold().blue()),
+            Span::from(" ")
         ]).alignment(Alignment::Center);
         let block = Block::bordered()
             .title(title)

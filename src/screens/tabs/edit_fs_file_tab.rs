@@ -18,7 +18,7 @@ impl EditFSFileTab {
     pub fn new() -> Self {
         let mut type_list_state = ListState::default();
         type_list_state.select_first();
-        let mut text_input = TextInput::new(&"".to_string(), 0);
+        let mut text_input = TextInput::new(&"".to_string(), 0, true);
         text_input.set_prefix(&"/".to_string());
 
         Self {
@@ -52,7 +52,7 @@ impl EditFSFileTab {
 
     pub fn get_fs_file(&self) -> FSFile {
         match self.type_list_state.selected() {
-            Some(0) => FSFile::Normal(self.text_input.get_input_text()),
+            Some(0) => FSFile::Normal(self.text_input.prefix.clone() + &self.text_input.get_value()),
             Some(2) => FSFile::Swap,
             _ => FSFile::None
         }

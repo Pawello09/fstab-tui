@@ -17,6 +17,7 @@ impl EditFSSpecTab {
         type_list_state.select_first();
         let mut text_input = TextInput::default();
         text_input.set_prefix(&"LABEL=".to_string());
+        text_input.set_whitespace_escaping(true);
 
         Self {
             type_list_state,
@@ -49,7 +50,7 @@ impl EditFSSpecTab {
     }
 
     pub fn get_fs_spec(&self) -> FSSpec {
-        let value = self.text_input.value.clone();
+        let value = self.text_input.get_value();
         match self.type_list_state.selected() {
             Some(0) => FSSpec::Label(value),
             Some(1) => FSSpec::UUID(value),

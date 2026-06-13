@@ -1,7 +1,7 @@
 use crate::fstab::fstab_entry::{FstabEntry};
 use crate::fstab::{Fstab, FstabLine};
 use crate::screens::screen::ScreenAction;
-use crate::screens::tabs::{EditFSFileTab, EditFSFreqTab, EditFSPassNoTab, EditFSVFSTypeTab};
+use crate::screens::tabs::{EditFSFileTab, EditFSFreqTab, EditFSMntOpsTab, EditFSPassNoTab, EditFSVFSTypeTab};
 use super::screen::Screen;
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::Frame;
@@ -9,7 +9,7 @@ use ratatui::layout::{Alignment, Constraint, Direction, Layout, Spacing};
 use ratatui::style::{Color, Style};
 use ratatui::symbols::border;
 use ratatui::symbols::merge::MergeStrategy;
-use ratatui::text::Line;
+use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, BorderType, Borders, Padding, Paragraph};
 use super::tabs::{ScreenTab, EditFSSpecTab};
 
@@ -35,6 +35,7 @@ pub struct EntryEditScreen {
     fs_spec_tab: EditFSSpecTab,
     fs_file_tab: EditFSFileTab,
     fs_vfs_type_tab: EditFSVFSTypeTab,
+    fs_mntops_tab: EditFSMntOpsTab,
     fs_freq_tab: EditFSFreqTab,
     fs_passno_tab: EditFSPassNoTab
 }
@@ -42,7 +43,27 @@ pub struct EntryEditScreen {
 impl Screen for EntryEditScreen {
     fn render(&mut self, frame: &mut Frame, area: ratatui::layout::Rect, _fstab: &Fstab) {
         let title = Line::from(" fstab tui - edit ").style(Style::new().bold()).alignment(Alignment::Center);
-        let keybinds = Line::from(vec![]).alignment(Alignment::Center);
+        let keybinds = Line::from(vec![
+            Span::from(" up ").into(),
+            Span::from("<up>").style(Style::new().bold().blue()),
+            Span::from(" down ").into(),
+            Span::from("<down>").style(Style::new().bold().blue()),
+            Span::from(" first item ").into(),
+            Span::from("<page up>").style(Style::new().bold().blue()),
+            Span::from(" last item ").into(),
+            Span::from("<page down>").style(Style::new().bold().blue()),
+            Span::from(" save ").into(),
+            Span::from("<enter>").style(Style::new().bold().blue()),
+            Span::from(" exit ").into(),
+            Span::from("<q>/<esc>").style(Style::new().bold().blue()),
+            Span::from(" select ").into(),
+            Span::from("<space>").style(Style::new().bold().blue()),
+            Span::from(" previous tab ").into(),
+            Span::from("<[>").style(Style::new().bold().blue()),
+            Span::from(" next tab ").into(),
+            Span::from("<]>").style(Style::new().bold().blue()),
+            Span::from(" ")
+        ]).alignment(Alignment::Center);
         let block = Block::bordered()
             .title(title)
             .title_bottom(keybinds)
@@ -101,6 +122,7 @@ impl Screen for EntryEditScreen {
             Tab::FSSpec => self.fs_spec_tab.render(frame, chunks[1]),
             Tab::FSFile => self.fs_file_tab.render(frame, chunks[1]),
             Tab::FSVFSType => self.fs_vfs_type_tab.render(frame, chunks[1]),
+            Tab::FSMntOps => self.fs_mntops_tab.render(frame, chunks[1]),
             Tab::FSFreq => self.fs_freq_tab.render(frame, chunks[1]),
             Tab::FSPassNo => self.fs_passno_tab.render(frame, chunks[1]),
             _ => {}
@@ -125,6 +147,7 @@ impl Screen for EntryEditScreen {
                 Tab::FSSpec => self.fs_spec_tab.handle_key_event(key_event),
                 Tab::FSFile => self.fs_file_tab.handle_key_event(key_event),
                 Tab::FSVFSType => self.fs_vfs_type_tab.handle_key_event(key_event),
+                Tab::FSMntOps => self.fs_mntops_tab.handle_key_event(key_event),
                 Tab::FSFreq => self.fs_freq_tab.handle_key_event(key_event),
                 Tab::FSPassNo => self.fs_passno_tab.handle_key_event(key_event),
                 _ => None
@@ -149,6 +172,7 @@ impl EntryEditScreen {
             fs_spec_tab: EditFSSpecTab::new(),
             fs_file_tab: EditFSFileTab::new(),
             fs_vfs_type_tab: EditFSVFSTypeTab::new(),
+            fs_mntops_tab: EditFSMntOpsTab::new(),
             fs_freq_tab: EditFSFreqTab::new(),
             fs_passno_tab: EditFSPassNoTab::new(),
             fstab_line: None
@@ -162,6 +186,7 @@ impl EntryEditScreen {
         self.fs_spec_tab.init(data.entry.fs_spec);
         self.fs_file_tab.init(data.entry.fs_file);
         self.fs_vfs_type_tab.init(data.entry.fs_vfs);
+        self.fs_mntops_tab.init(data.entry.fs_mntops);
         self.fs_freq_tab.init(data.entry.fs_freq);
         self.fs_passno_tab.init(data.entry.fs_passno);
     }
@@ -202,7 +227,7 @@ impl EntryEditScreen {
                 fs_spec: self.fs_spec_tab.get_fs_spec(),
                 fs_file: self.fs_file_tab.get_fs_file(),
                 fs_vfs: self.fs_vfs_type_tab.get_fs_vfs_type(),
-                fs_mntops: vec![],
+                fs_mntops: self.fs_mntops_tab.get_fs_mntops(),
                 fs_freq: self.fs_freq_tab.get_fs_freq(),
                 fs_passno: self.fs_passno_tab.get_fs_passno()
             });
